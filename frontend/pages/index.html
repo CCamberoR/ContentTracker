@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .python-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #output {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Content Tracker</h1>
+        <p>Aplicación híbrida Python + Electron</p>
+        
+        <div class="python-section">
+            <h2>🐍 Python Backend</h2>
+            <button onclick="testPython()">Probar conexión con Python</button>
+            <div id="output"></div>
+        </div>
+        
+        <div class="python-section">
+            <h2>📊 Funcionalidades</h2>
+            <p>Esta aplicación combina:</p>
+            <ul>
+                <li>Frontend: Electron + HTML/CSS/JavaScript</li>
+                <li>Backend: Python con pandas, matplotlib, scikit-learn</li>
+                <li>Interfaz nativa de escritorio</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const { spawn } = require('child_process');
+        
+        function testPython() {
+            const output = document.getElementById('output');
+            output.textContent = 'Ejecutando script de Python...\n';
+            
+            // Ejecutar un script de Python simple
+            const python = spawn('python', ['-c', 'print("¡Python funcionando correctamente!"); import pandas as pd; print("Pandas version:", pd.__version__)']);
+            
+            python.stdout.on('data', (data) => {
+                output.textContent += data.toString();
+            });
+            
+            python.stderr.on('data', (data) => {
+                output.textContent += 'Error: ' + data.toString();
+            });
+            
+            python.on('close', (code) => {
+                output.textContent += `\nProceso terminado con código: ${code}`;
+            });
+        }
+        
+        // Evento cuando la página está lista
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Content Tracker iniciado correctamente');
+        });
+    </script>
+</body>
+</html>
