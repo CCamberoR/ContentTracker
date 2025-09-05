@@ -7,38 +7,23 @@
 
 Una aplicación de escritorio para el seguimiento y análisis de contenido, construida con Python y Electron.
 
-## 🚀 Características
-
-- **Interfaz de Usuario Moderna**: Aplicación de escritorio construida con Electron
-- **Backend Potente**: Procesamiento de datos con Python y librerías científicas
-- **Análisis de Datos**: Integración con pandas, matplotlib y scikit-learn
-- **Cross-Platform**: Funciona en Windows, macOS y Linux
-- **Arquitectura Modular**: Separación clara entre frontend y backend
-
 ## 📁 Estructura del Proyecto
 
 ```
 ContentTracker/
 ├── 📂 backend/              # Backend en Python
-│   ├── 📂 api/              # Endpoints de la API
-│   ├── 📂 core/             # Lógica de negocio
-│   ├── 📂 models/           # Modelos de datos
-│   ├── 📂 utils/            # Utilidades
+│   ├── __init__.py
 │   └── main.py              # Punto de entrada del backend
 ├── 📂 frontend/             # Frontend en Electron
 │   ├── 📂 assets/           # Recursos estáticos
 │   │   ├── 📂 css/          # Estilos
-│   │   ├── 📂 js/           # JavaScript
-│   │   └── 📂 images/       # Imágenes
-│   ├── 📂 components/       # Componentes reutilizables
+│   │   └── 📂 js/           # JavaScript
 │   └── 📂 pages/            # Páginas de la aplicación
-├── 📂 config/               # Archivos de configuración
-├── 📂 data/                 # Datos del proyecto
-├── 📂 docs/                 # Documentación
-├── 📂 tests/                # Pruebas
+│       └── index.html       # Página principal
 ├── main.js                  # Punto de entrada de Electron
 ├── package.json             # Dependencias de Node.js
-└── requirements.txt         # Dependencias de Python
+├── requirements.txt         # Dependencias de Python
+└── README.md               # Este archivo
 ```
 
 ## 🛠️ Instalación
@@ -102,23 +87,6 @@ source .venv/bin/activate  # macOS/Linux
 python backend/main.py
 ```
 
-### Desarrollo
-
-```bash
-# Modo desarrollo con recarga automática
-npm run dev
-```
-
-## 🧪 Testing
-
-```bash
-# Ejecutar pruebas de Python
-python -m pytest tests/
-
-# Ejecutar pruebas de JavaScript
-npm test
-```
-
 ## 📊 Dependencias
 
 ### Python (Backend)
@@ -129,31 +97,6 @@ npm test
 ### JavaScript (Frontend)
 - **Electron**: Framework para aplicaciones de escritorio
 - **Node.js**: Entorno de ejecución
-
-## 🔧 Configuración
-
-Los archivos de configuración se encuentran en la carpeta `config/`. 
-
-### Variables de Entorno
-
-Crea un archivo `.env` en la raíz del proyecto:
-
-```env
-# Configuración del servidor
-PORT=3000
-DEBUG=true
-
-# Configuración de la base de datos
-DATABASE_URL=sqlite:///data/contenttracker.db
-```
-
-## 📚 Documentación
-
-La documentación completa se encuentra en la carpeta `docs/`.
-
-- [Guía de Instalación](docs/installation.md)
-- [Guía de Desarrollo](docs/development.md)
-- [API Reference](docs/api.md)
 
 ## 📝 Scripts Disponibles
 
@@ -170,20 +113,17 @@ npm run dev
 # Construir para producción
 npm run build
 
-# Ejecutar pruebas
-npm test
-
-# Linting
-npm run lint
+# Ejecutar backend
+npm run backend
 ```
 
-## 🐛 Solución de Problemas
+## 🤝 Contribución
 
-### Problemas Comunes
-
-1. **Error de permisos con git**: Asegúrate de tener configuradas las credenciales correctas
-2. **Dependencias faltantes**: Ejecuta `npm install` y `uv pip install -r requirements.txt`
-3. **Python no encontrado**: Verifica que Python esté en tu PATH
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-caracteristica`)
+3. Commit tus cambios (`git commit -m 'Agregar nueva característica'`)
+4. Push a la rama (`git push origin feature/nueva-caracteristica`)
+5. Abre un Pull Request
 
 ## 📄 Licencia
 
@@ -192,3 +132,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ## 👨‍💻 Autor
 
 **Carlos Cambero** - [@CCamberoR](https://github.com/CCamberoR)
+
+---
+
+⭐ ¡No olvides dar una estrella al proyecto si te resulta útil!
