@@ -14,18 +14,18 @@ function createWindow() {
       contextIsolation: false,
       enableRemoteModule: true
     },
-    icon: path.join(__dirname, 'assets/icon.png'), // Opcional: añade un icono
+    icon: path.join(__dirname, 'frontend/assets/images/icon.png'), // Opcional: añade un icono
     show: false // No mostrar hasta que esté listo
   });
 
   // Cargar la aplicación
   if (isDev) {
     // En desarrollo, puedes cargar localhost si tienes un servidor web
-    mainWindow.loadFile('src/index.html');
+    mainWindow.loadFile('frontend/pages/index.html');
     mainWindow.webContents.openDevTools(); // Abrir DevTools en desarrollo
   } else {
     // En producción
-    mainWindow.loadFile('src/index.html');
+    mainWindow.loadFile('frontend/pages/index.html');
   }
 
   // Mostrar cuando esté listo

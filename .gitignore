@@ -336,3 +336,6 @@ dist/
 
 # UV Python package manager
 .uv/
+
+# Scripts de instalación de software necesario
+Scripts de instalación de software necesario

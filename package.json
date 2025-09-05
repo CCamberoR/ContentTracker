@@ -7,7 +7,16 @@
     "start": "electron .",
     "dev": "electron . --enable-logging",
     "build": "electron-builder",
-    "install-python": "pip install -r requirements.txt"
+    "dist": "electron-builder --publish=never",
+    "pack": "electron-builder --dir",
+    "install-python": "uv pip install -r requirements.txt",
+    "install-python-pip": "pip install -r requirements.txt",
+    "backend": "python backend/main.py",
+    "api": "python backend/api/server.py",
+    "test": "echo \"No tests specified\" && exit 0",
+    "lint": "echo \"No linting configured\" && exit 0",
+    "clean": "rm -rf dist/ node_modules/.cache/",
+    "setup": "npm install && npm run install-python"
   },
   "keywords": [
     "electron",
