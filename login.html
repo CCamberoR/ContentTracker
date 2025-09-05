@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brújula de Conocimiento - Acceso</title>
+    <link rel="stylesheet" href="frontend/assets/css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>🧭 Mi Brújula de Conocimiento</h1>
+                <p>Accede a tu espacio personal de aprendizaje</p>
+            </div>
+
+            <div class="login-forms">
+                <!-- Formulario de Login -->
+                <div id="loginForm" class="form-container active">
+                    <h2>Iniciar Sesión</h2>
+                    <form id="loginFormElement">
+                        <div class="input-group">
+                            <label for="loginUsername">Usuario</label>
+                            <input type="text" id="loginUsername" name="username" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="loginPassword">Contraseña</label>
+                            <input type="password" id="loginPassword" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ingresar</button>
+                    </form>
+                    <p class="form-switch">
+                        ¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a>
+                    </p>
+                </div>
+
+                <!-- Formulario de Registro -->
+                <div id="registerForm" class="form-container">
+                    <h2>Crear Cuenta</h2>
+                    <form id="registerFormElement">
+                        <div class="input-group">
+                            <label for="registerUsername">Usuario</label>
+                            <input type="text" id="registerUsername" name="username" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="registerEmail">Email</label>
+                            <input type="email" id="registerEmail" name="email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="registerPassword">Contraseña</label>
+                            <input type="password" id="registerPassword" name="password" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="registerPasswordConfirm">Confirmar Contraseña</label>
+                            <input type="password" id="registerPasswordConfirm" name="passwordConfirm" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+                    </form>
+                    <p class="form-switch">
+                        ¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión aquí</a>
+                    </p>
+                </div>
+            </div>
+
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script src="frontend/assets/js/login.js"></script>
+</body>
+</html>

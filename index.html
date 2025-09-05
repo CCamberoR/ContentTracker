@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Brújula de Conocimiento - Seguimiento de Contenido</title>
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="frontend/assets/css/style.css">
+    
+    <!-- Chart.js para visualizaciones -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Content Security Policy para Electron -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://cdn.jsdelivr.net;">
+</head>
+<body>
+    <!-- Header con navegación principal -->
+    <header class="main-header">
+        <div class="header-container">
+            <h1 class="app-title">
+                <span class="icon">🧭</span>
+                Mi Brújula de Conocimiento
+            </h1>
+            
+            <!-- Navegación principal -->
+            <nav class="main-navigation">
+                <button id="dashboard-btn" class="nav-btn active" data-view="dashboard">
+                    <span class="nav-icon">📊</span>
+                    Dashboard de Análisis
+                </button>
+                <button id="add-content-btn" class="nav-btn" data-view="add-content">
+                    <span class="nav-icon">➕</span>
+                    Añadir Nuevo Contenido
+                </button>
+                <button id="library-btn" class="nav-btn" data-view="library">
+                    <span class="nav-icon">📖</span>
+                    Ver Mi Biblioteca
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenido principal dinámico -->
+    <main id="main-content" class="main-content">
+        <!-- Las vistas se cargarán dinámicamente aquí por renderer.js -->
+        <div id="loading" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Cargando Content Tracker...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <p>&copy; 2025 Content Tracker - Gestiona tu aprendizaje</p>
+    </footer>
+
+    <!-- Scripts -->
+    <!-- El preload.js se carga automáticamente por Electron -->
+    <!-- renderer.js se ejecuta después de que el DOM esté listo -->
+    <script src="frontend/assets/js/renderer.js"></script>
+</body>
+</html>

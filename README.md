@@ -1,130 +1,275 @@
-# ContentTracker
+# 🧭 Mi Brújula de Conocimiento - ContentTracker
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
-[![Electron](https://img.shields.io/badge/Electron-Latest-47848f.svg)](https://www.electronjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+Una aplicación de escritorio moderna para gestionar y rastrear tu viaje de aprendizaje personal. Desde libros y audiolibros hasta podcasts y cursos, mantén organizados todos tus recursos de conocimiento en un solo lugar.
 
-Una aplicación de escritorio para el seguimiento y análisis de contenido, construida con Python y Electron.
+![Electron](https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white)
+![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 
-## 📁 Estructura del Proyecto
+## ✨ Características Principales
 
+### 🔐 Sistema de Autenticación
+- **Registro de usuarios** con validación de datos
+- **Inicio de sesión seguro** con gestión de sesiones
+- **Base de datos SQLite** para almacenamiento local
+- **Validación de credenciales** y manejo de errores
+
+### 📊 Dashboard Inteligente
+- **Estadísticas en tiempo real**: Total de contenido, progreso mensual y semanal
+- **Gráficos interactivos**: Distribución por tipos, evolución temporal, top géneros
+- **Métricas de progreso**: Páginas leídas, horas de audio/video consumidas
+- **Visualización de ratings**: Distribución de valoraciones y contenido favorito
+
+### 📚 Gestión de Contenido
+- **Múltiples tipos de medios**: Libros, Audiolibros, Podcasts, Videos, Cursos, Artículos, Documentales, Películas, Series
+- **Campos dinámicos**: Páginas para libros, duración para audio/video
+- **Sistema de valoración**: Estrellas de 1 a 5 para cada ítem
+- **Estados de progreso**: Completado vs. En progreso
+- **Notas personales**: Espacio para comentarios y reflexiones
+
+### 🔍 Búsqueda y Filtros Avanzados
+- **Búsqueda por texto**: En título, autor, género y notas
+- **Filtros múltiples**: Por tipo, género, rating y estado de finalización
+- **Ordenamiento**: Por fecha de inicio, rating, tipo, etc.
+- **Vista de biblioteca**: Tabla organizada con toda la información
+
+### 🎨 Interfaz Moderna
+- **Diseño responsive**: Se adapta a cualquier tamaño de ventana
+- **Ventanas maximizables**: Soporte completo para redimensionar y maximizar
+- **Navegación intuitiva**: Dashboard, Agregar Contenido, Mi Biblioteca
+- **Indicadores visuales**: Estados, ratings con estrellas, badges de tipo
+
+## 🛠️ Tecnologías Utilizadas
+
+### Backend
+- **Electron**: Framework para aplicaciones de escritorio
+- **Node.js**: Runtime de JavaScript
+- **SQLite3**: Base de datos local ligera
+- **IPC (Inter-Process Communication)**: Comunicación segura entre procesos
+
+### Frontend
+- **HTML5/CSS3**: Estructura y estilos modernos
+- **JavaScript ES6+**: Lógica de aplicación
+- **Chart.js**: Gráficos y visualizaciones
+- **CSS Grid/Flexbox**: Layout responsive
+
+### Base de Datos
+```sql
+-- Tabla de recursos/contenido
+CREATE TABLE "resources" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "title" TEXT NOT NULL,
+    "author" TEXT,
+    "type" TEXT NOT NULL,
+    "start_date" TEXT,
+    "end_date" TEXT,
+    "pages" INTEGER,
+    "duration_mins" INTEGER,
+    "genre" TEXT,
+    "rating" INTEGER,
+    "notes" TEXT
+);
+
+-- Tabla de usuarios
+CREATE TABLE "users" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "username" TEXT NOT NULL UNIQUE,
+    "email" TEXT NOT NULL UNIQUE,
+    "password_hash" TEXT NOT NULL,
+    "created_at" TEXT DEFAULT (DATE('now')),
+    "updated_at" TEXT
+);
 ```
-ContentTracker/
-├── 📂 backend/              # Backend en Python
-│   ├── __init__.py
-│   └── main.py              # Punto de entrada del backend
-├── 📂 frontend/             # Frontend en Electron
-│   ├── 📂 assets/           # Recursos estáticos
-│   │   ├── 📂 css/          # Estilos
-│   │   └── 📂 js/           # JavaScript
-│   └── 📂 pages/            # Páginas de la aplicación
-│       └── index.html       # Página principal
-├── main.js                  # Punto de entrada de Electron
-├── package.json             # Dependencias de Node.js
-├── requirements.txt         # Dependencias de Python
-└── README.md               # Este archivo
-```
 
-## 🛠️ Instalación
+## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
+- **Node.js** (versión 14 o superior)
+- **npm** (incluido con Node.js)
 
-- **Python 3.8+** instalado
-- **Node.js 16+** instalado
-- **UV** (recomendado para gestión de paquetes Python)
+### Pasos de Instalación
 
-### Clonar el Repositorio
-
+1. **Clonar el repositorio**
 ```bash
 git clone https://github.com/CCamberoR/ContentTracker.git
 cd ContentTracker
 ```
 
-### Configurar el Backend (Python)
-
+2. **Instalar dependencias**
 ```bash
-# Crear entorno virtual
-python -m venv .venv
-
-# Activar entorno virtual
-# En Windows:
-.venv\Scripts\activate
-# En macOS/Linux:
-source .venv/bin/activate
-
-# Instalar dependencias con UV (recomendado)
-uv pip install -r requirements.txt
-
-# O con pip tradicional
-pip install -r requirements.txt
-```
-
-### Configurar el Frontend (Electron)
-
-```bash
-# Instalar dependencias de Node.js
 npm install
 ```
 
-## 🚀 Uso
+3. **Verificar la base de datos**
+Asegúrate de que existe el archivo `ContentTracker_database.db` con las tablas necesarias.
 
-### Ejecutar la Aplicación
-
+4. **Ejecutar la aplicación**
 ```bash
-# Iniciar la aplicación Electron
 npm start
 ```
 
-### Ejecutar Solo el Backend
+## 📖 Guía de Uso
 
-```bash
-# Activar entorno virtual (si no está activo)
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
+### Primer Uso
+1. **Iniciar la aplicación**: La pantalla de login aparece automáticamente
+2. **Crear cuenta**: Clic en "Regístrate aquí" y completa el formulario
+3. **Iniciar sesión**: Usa tus credenciales para acceder a la aplicación principal
 
-# Ejecutar backend
-python backend/main.py
+### Agregar Contenido
+1. **Navegar a "Agregar Contenido"**
+2. **Completar el formulario**:
+   - Título y autor/fuente
+   - Tipo de contenido (libro, podcast, etc.)
+   - Fechas de inicio y finalización
+   - Métricas específicas (páginas o duración)
+   - Género y valoración
+   - Notas personales
+
+### Explorar tu Biblioteca
+1. **Ir a "Mi Biblioteca"**
+2. **Usar filtros y búsqueda**:
+   - Buscar por texto libre
+   - Filtrar por tipo, género, rating
+   - Ver solo completados o en progreso
+
+### Dashboard y Estadísticas
+1. **Vista general**: Métricas principales en la página de inicio
+2. **Gráficos interactivos**: Distribución de contenido y progreso temporal
+3. **Top géneros**: Los temas más populares en tu biblioteca
+
+## 📁 Estructura del Proyecto
+
+```
+ContentTracker/
+├── main.js                     # Proceso principal de Electron
+├── preload.js                  # Script de preload (puente IPC)
+├── package.json                # Configuración y dependencias
+├── index.html                  # Aplicación principal
+├── login.html                  # Pantalla de autenticación
+├── frontend/
+│   └── assets/
+│       ├── css/
+│       │   ├── style.css       # Estilos de la aplicación
+│       │   └── login.css       # Estilos del login
+│       └── js/
+│           ├── renderer.js     # Lógica del frontend principal
+│           └── login.js        # Lógica de autenticación
+├── ContentTracker_database.db  # Base de datos SQLite
+└── README.md                   # Este archivo
 ```
 
-## 📊 Dependencias
+## 🎯 Tipos de Contenido Soportados
 
-### Python (Backend)
-- **pandas**: Manipulación y análisis de datos
-- **matplotlib**: Visualización de datos
-- **scikit-learn**: Machine learning y análisis estadístico
+| Tipo | Icono | Métricas | Campos Específicos |
+|------|-------|----------|-------------------|
+| Libro | 📚 | Páginas | Páginas totales/leídas |
+| Audiolibro | 🎧 | Duración | Minutos de audio |
+| Podcast | 🎙️ | Duración | Episodios y duración |
+| Video | 📹 | Duración | Minutos de video |
+| Curso | 🎓 | Duración | Horas del curso |
+| Artículo | 📄 | Páginas | Páginas estimadas |
+| Documental | 🎬 | Duración | Minutos del documental |
 
-### JavaScript (Frontend)
-- **Electron**: Framework para aplicaciones de escritorio
-- **Node.js**: Entorno de ejecución
+## 📊 Métricas y Estadísticas
 
-## 📝 Scripts Disponibles
+### Dashboard Principal
+- **Total de ítems** en tu biblioteca
+- **Contenido de este mes** y esta semana
+- **Páginas totales** leídas
+- **Horas de audio/video** consumidas
+
+### Visualizaciones Avanzadas
+- **Gráfico de barras**: Distribución por tipo de contenido
+- **Gráfico temporal**: Evolución mensual de tu aprendizaje
+- **Top 5 géneros**: Tus áreas de interés principales
+- **Distribución de ratings**: Calidad percibida de tu contenido
+- **Progreso anual**: Acumulación de páginas y horas por mes
+
+## 🔒 Seguridad y Privacidad
+
+- **Almacenamiento local**: Todos los datos se mantienen en tu equipo
+- **Base de datos SQLite**: Ligera y eficiente para uso personal
+- **Passwords hasheados**: Las contraseñas se almacenan de forma segura
+- **IPC seguro**: Comunicación aislada entre procesos
+
+## 🛠️ Comandos de Desarrollo
 
 ```bash
 # Instalar dependencias
 npm install
 
-# Iniciar aplicación
+# Ejecutar en modo desarrollo
 npm start
 
-# Modo desarrollo
-npm run dev
+# Limpiar cache (si hay problemas)
+npm run clean
 
-# Construir para producción
-npm run build
-
-# Ejecutar backend
-npm run backend
+# Verificar dependencias
+npm list
 ```
+
+## 🐛 Solución de Problemas
+
+### Error: "No handler registered"
+- **Causa**: Desalineación entre frontend y backend
+- **Solución**: Reiniciar la aplicación, los handlers están sincronizados
+
+### Error: "SQLITE_ERROR: no such column"
+- **Causa**: Esquema de base de datos desactualizado
+- **Solución**: Verificar que las tablas tengan los campos correctos
+
+### DevTools abriéndose automáticamente
+- **Causa**: Modo desarrollo activo
+- **Solución**: Las DevTools están deshabilitadas por defecto
+
+### Error al cerrar la aplicación
+- **Síntoma**: Error de JavaScript al cerrar (no afecta funcionalidad)
+- **Estado**: Conocido, no impacta el uso normal de la aplicación
+
+## 🔮 Funcionalidades Futuras
+
+- [ ] **Exportación de datos** a PDF/Excel
+- [ ] **Sincronización en la nube** (opcional)
+- [ ] **Modo oscuro/claro** personalizable
+- [ ] **Notificaciones y recordatorios** de lectura
+- [ ] **Metas y objetivos** de aprendizaje
+- [ ] **Integración con APIs** de libros y podcasts
+- [ ] **Sistema de etiquetas** avanzado
+- [ ] **Recomendaciones** basadas en historial
+
+## 👥 Contribuir
+
+¡Las contribuciones son bienvenidas! Por favor:
+
+1. Hacer fork del repositorio
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-## 👨‍💻 Autor
+## 🙏 Agradecimientos
 
-**Carlos Cambero** - [@CCamberoR](https://github.com/CCamberoR)
+- **Electron** por hacer posibles las aplicaciones de escritorio con tecnologías web
+- **SQLite** por una base de datos robusta y ligera
+- **Chart.js** por las visualizaciones interactivas
+- **La comunidad open source** por las herramientas y recursos
 
 ---
 
-⭐ ¡No olvides dar una estrella al proyecto si te resulta útil!
+**Mi Brújula de Conocimiento** - Navega tu viaje de aprendizaje con confianza 🧭✨
+
+## 📞 Soporte
+
+¿Tienes preguntas o problemas? 
+- Abre un **Issue** en GitHub
+- Revisa la documentación en el **README**
+- Consulta los **logs de la aplicación** para debugging
+
+---
+
+*Desarrollado con ❤️ para learners apasionados*
