@@ -391,6 +391,30 @@ function renderAddContentView() {
 }
 
 // ==============================================
+// VISTA: EDITAR CONTENIDO
+// ==============================================
+
+/**
+ * Renderizar la vista de editar contenido
+ */
+function renderEditContentView() {
+    console.log('➕ Renderizando Edit Content');
+    // TODO: Implementar la funcionalidad de edición
+}
+
+// ==============================================
+// VISTA: ELIMINAR CONTENIDO
+// ==============================================
+
+/**
+ * Renderizar la vista de eliminar contenido
+ */
+function renderDeleteContentView() {
+    console.log('➕ Renderizando Delete Content');
+    // TODO: Implementar la funcionalidad de eliminación
+}
+
+// ==============================================
 // VISTA: BIBLIOTECA
 // ==============================================
 
