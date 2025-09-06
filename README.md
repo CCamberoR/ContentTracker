@@ -22,8 +22,8 @@ Una aplicación de escritorio moderna para gestionar y rastrear tu viaje de apre
 - **Visualización de ratings**: Distribución de valoraciones y contenido favorito
 
 ### 📚 Gestión de Contenido
-- **Múltiples tipos de medios**: Libros, Audiolibros, Podcasts, Videos, Cursos, Artículos, Documentales, Películas, Series
-- **Campos dinámicos**: Páginas para libros, duración para audio/video
+- **Múltiples tipos de medios**: Libros, Audiolibros, Podcasts, **Videos**, Cursos, Artículos, Documentales, **Películas**, **Series**
+- **Campos dinámicos**: Páginas para libros, duración para audio/video/películas
 - **Sistema de valoración**: Estrellas de 1 a 5 para cada ítem
 - **Estados de progreso**: Completado vs. En progreso
 - **Notas personales**: Espacio para comentarios y reflexiones
@@ -65,6 +65,7 @@ CREATE TABLE "resources" (
     "start_date" TEXT,
     "end_date" TEXT,
     "pages" INTEGER,
+    "episodes" INTEGER,
     "duration_mins" INTEGER,
     "genre" TEXT,
     "rating" INTEGER,
@@ -166,7 +167,9 @@ ContentTracker/
 | Libro | 📚 | Páginas | Páginas totales/leídas |
 | Audiolibro | 🎧 | Duración | Minutos de audio |
 | Podcast | 🎙️ | Duración | Episodios y duración |
-| Video | 📹 | Duración | Minutos de video |
+| **Video** | 📹 | Duración | Minutos de video |
+| **Película** | 🎬 | Duración | Minutos de película |
+| **Serie** | 📺 | Duración | Episodios y duración |
 | Curso | 🎓 | Duración | Horas del curso |
 | Artículo | 📄 | Páginas | Páginas estimadas |
 | Documental | 🎬 | Duración | Minutos del documental |
@@ -238,38 +241,15 @@ npm list
 - [ ] **Sistema de etiquetas** avanzado
 - [ ] **Recomendaciones** basadas en historial
 
-## 👥 Contribuir
-
-¡Las contribuciones son bienvenidas! Por favor:
-
-1. Hacer fork del repositorio
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit de tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
-
-## 📄 Licencia
+##  Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
 ## 🙏 Agradecimientos
 
-- **Electron** por hacer posibles las aplicaciones de escritorio con tecnologías web
-- **SQLite** por una base de datos robusta y ligera
-- **Chart.js** por las visualizaciones interactivas
-- **La comunidad open source** por las herramientas y recursos
+- **Carlos Cambero Rojas** - Desarrollo y conceptualización del proyecto
+- **GitHub Copilot con Claude Sonnet 4** - Asistencia en el desarrollo y documentación
 
 ---
 
-**Mi Brújula de Conocimiento** - Navega tu viaje de aprendizaje con confianza 🧭✨
-
-## 📞 Soporte
-
-¿Tienes preguntas o problemas? 
-- Abre un **Issue** en GitHub
-- Revisa la documentación en el **README**
-- Consulta los **logs de la aplicación** para debugging
-
----
-
-*Desarrollado con ❤️ para learners apasionados*
+**Content Tracker** - Navega tu viaje de aprendizaje con confianza 🧭✨
