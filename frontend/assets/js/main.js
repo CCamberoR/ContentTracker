@@ -1,4 +1,4 @@
-// ContentTracker - Scripts principales
+// Content Tracker - Scripts principales
 
 // TODO: Implementar funcionalidad JavaScript
 

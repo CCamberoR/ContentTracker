@@ -552,13 +552,13 @@ body {
     text-transform: uppercase;
 }
 
-.type-video { background: #e3f2fd; color: #1976d2; }
-.type-libro { background: #f3e5f5; color: #7b1fa2; }
-.type-articulo { background: #e8f5e8; color: #388e3c; }
-.type-curso { background: #fff3e0; color: #f57c00; }
+.type-book { background: #f3e5f5; color: #7b1fa2; }
 .type-podcast { background: #fce4ec; color: #c2185b; }
-.type-pelicula { background: #f3e5f5; color: #d32f2f; }
-.type-serie { background: #e1f5fe; color: #0277bd; }
+.type-article { background: #e8f5e8; color: #388e3c; }
+.type-course { background: #fff3e0; color: #f57c00; }
+.type-video { background: #e3f2fd; color: #1976d2; }
+.type-show { background: #e1f5fe; color: #0277bd; }
+.type-movie { background: #f3e5f5; color: #d32f2f; }
 
 .action-buttons {
     display: flex;

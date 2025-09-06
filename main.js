@@ -70,7 +70,7 @@ function createLoginWindow() {
     resizable: true,  // Permitir redimensionar
     center: true,
     autoHideMenuBar: true,
-    title: 'Brújula de Conocimiento - Acceso',
+    title: 'Content Tracker - Acceso',
     maximizable: true,  // Permitir maximizar
     minimizable: true   // Permitir minimizar
   });
@@ -115,7 +115,7 @@ function createMainWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
     show: false, // No mostrar hasta que esté listo
-    title: 'Mi Brújula de Conocimiento',
+    title: 'Content Tracker',
     resizable: true,    // Permitir redimensionar
     maximizable: true,  // Permitir maximizar
     minimizable: true,  // Permitir minimizar
@@ -169,12 +169,15 @@ function createMainWindow() {
  */
 ipcMain.handle('create-content', async (event, itemData) => {
   return new Promise((resolve) => {
+    // DEBUG: Verificar datos recibidos
+    console.log('DEBUG create-content - itemData:', itemData);
+    
     const stmt = db.prepare(`
       INSERT INTO resources (
         title, author, type, start_date, end_date, 
-        pages, duration_mins, genre, rating, notes
+        pages, episodes, duration_mins, genre, rating, notes
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     stmt.run(
@@ -184,6 +187,7 @@ ipcMain.handle('create-content', async (event, itemData) => {
       itemData.start_date,
       itemData.end_date || null,
       itemData.pages || null,
+      itemData.episodes || null,  // ¡ESTE CAMPO FALTABA!
       itemData.duration_mins || null,
       itemData.genre || null,
       itemData.rating || null,
@@ -250,7 +254,7 @@ ipcMain.handle('update-content', async (event, id, updatedItemData) => {
     const stmt = db.prepare(`
       UPDATE resources 
       SET title = ?, author = ?, type = ?, start_date = ?, end_date = ?,
-          pages = ?, duration_mins = ?, genre = ?, rating = ?, notes = ?
+          pages = ?, episodes = ?, duration_mins = ?, genre = ?, rating = ?, notes = ?
       WHERE id = ?
     `);
     
@@ -261,6 +265,7 @@ ipcMain.handle('update-content', async (event, id, updatedItemData) => {
       updatedItemData.start_date,
       updatedItemData.end_date || null,
       updatedItemData.pages || null,
+      updatedItemData.episodes || null,  // ¡AÑADIDO EL CAMPO EPISODES!
       updatedItemData.duration_mins || null,
       updatedItemData.genre || null,
       updatedItemData.rating || null,
@@ -442,9 +447,15 @@ ipcMain.handle('get-dashboard-stats', async () => {
       if (++completed === 5) finishStats();
     });
     
-    // Total de horas escuchadas/vistas
+    // Total de horas escuchadas/vistas (considerando episodios para series)
     db.get(`
-      SELECT SUM(duration_mins) as totalMinutes FROM resources 
+      SELECT SUM(
+        CASE 
+          WHEN type = 'show' AND episodes IS NOT NULL 
+          THEN duration_mins * episodes 
+          ELSE duration_mins 
+        END
+      ) as totalMinutes FROM resources 
       WHERE duration_mins IS NOT NULL
     `, (err, row) => {
       if (err) {
@@ -520,7 +531,15 @@ ipcMain.handle('get-top-genres', async () => {
         genre,
         COUNT(*) as count,
         SUM(CASE WHEN pages IS NOT NULL THEN pages ELSE 0 END) as total_pages,
-        SUM(CASE WHEN duration_mins IS NOT NULL THEN duration_mins ELSE 0 END) as total_minutes
+        SUM(
+          CASE 
+            WHEN type = 'show' AND episodes IS NOT NULL AND duration_mins IS NOT NULL 
+            THEN duration_mins * episodes 
+            WHEN duration_mins IS NOT NULL 
+            THEN duration_mins 
+            ELSE 0 
+          END
+        ) as total_minutes
       FROM resources 
       WHERE genre IS NOT NULL AND genre != ''
       GROUP BY genre 
@@ -572,7 +591,15 @@ ipcMain.handle('get-annual-progress', async () => {
       SELECT 
         strftime('%Y-%m', start_date) as month,
         SUM(CASE WHEN pages IS NOT NULL THEN pages ELSE 0 END) as pages,
-        SUM(CASE WHEN duration_mins IS NOT NULL THEN duration_mins ELSE 0 END) as minutes
+        SUM(
+          CASE 
+            WHEN type = 'show' AND episodes IS NOT NULL AND duration_mins IS NOT NULL 
+            THEN duration_mins * episodes 
+            WHEN duration_mins IS NOT NULL 
+            THEN duration_mins 
+            ELSE 0 
+          END
+        ) as minutes
       FROM resources 
       WHERE strftime('%Y', start_date) = strftime('%Y', 'now')
       GROUP BY strftime('%Y-%m', start_date)
@@ -778,6 +805,74 @@ ipcMain.handle('open-main-app', async () => {
     console.error('Error abriendo aplicación principal:', error);
     return { success: false, error: 'Error abriendo aplicación' };
   }
+});
+
+/**
+ * Función temporal para arreglar registros existentes sin episodes
+ */
+ipcMain.handle('fix-existing-shows', async () => {
+  return new Promise((resolve) => {
+    // Primero obtener todas las series que no tienen episodes o tienen episodes = null
+    db.all(`
+      SELECT id, title, duration_mins 
+      FROM resources 
+      WHERE type = 'show' AND (episodes IS NULL OR episodes = 0)
+    `, (err, rows) => {
+      if (err) {
+        console.error('Error obteniendo series sin episodes:', err.message);
+        resolve({ success: false, error: err.message });
+        return;
+      }
+      
+      console.log(`Encontradas ${rows.length} series sin campo episodes`);
+      
+      if (rows.length === 0) {
+        resolve({ success: true, message: 'No hay series que necesiten corrección' });
+        return;
+      }
+      
+      // Por cada serie, asignar un valor por defecto para episodes basado en la duración
+      // Esta es una estimación: si la duración es muy alta, probablemente tiene muchos episodios
+      let updated = 0;
+      let errors = 0;
+      
+      rows.forEach((row, index) => {
+        // Estimación: si tiene más de 60 minutos, probablemente son múltiples episodios
+        // Si tiene menos, probablemente es 1 episodio (película larga o episodio especial)
+        let estimatedEpisodes = 1;
+        if (row.duration_mins && row.duration_mins > 60) {
+          // Estimar basándose en episodios de ~25-45 minutos promedio
+          estimatedEpisodes = Math.max(1, Math.round(row.duration_mins / 30));
+        }
+        
+        const updateStmt = db.prepare(`
+          UPDATE resources 
+          SET episodes = ? 
+          WHERE id = ?
+        `);
+        
+        updateStmt.run(estimatedEpisodes, row.id, function(updateErr) {
+          if (updateErr) {
+            console.error(`Error actualizando serie ${row.title}:`, updateErr.message);
+            errors++;
+          } else {
+            console.log(`Actualizada serie "${row.title}" (ID: ${row.id}) con ${estimatedEpisodes} episodios estimados`);
+            updated++;
+          }
+          
+          // Si es el último elemento, resolver la promesa
+          if (index === rows.length - 1) {
+            resolve({ 
+              success: true, 
+              message: `Actualizadas ${updated} series. Errores: ${errors}`,
+              updated: updated,
+              errors: errors
+            });
+          }
+        });
+      });
+    });
+  });
 });
 
 // Este método se ejecuta cuando Electron ha terminado la inicialización

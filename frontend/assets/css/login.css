@@ -1,5 +1,5 @@
 /* =============================================================================
-   Login/Register Styles - Mi Brújula de Conocimiento
+   Login/Register Styles - Content Tracker
    ============================================================================= */
 
 * {
@@ -190,6 +190,64 @@ body {
     color: #2c5282;
     border: 1px solid #90cdf4;
     display: block;
+}
+
+/* Saved session styles */
+.saved-session {
+    background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+    border: 1px solid #81e6d9;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.saved-session-content p {
+    color: #234e52;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.saved-session-buttons {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.btn-sm {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    margin-top: 0;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 400px) {
+    .saved-session-buttons {
+        flex-direction: row;
+    }
 }
 
 /* Loading state */

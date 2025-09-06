@@ -213,6 +213,15 @@ contextBridge.exposeInMainWorld('api', {
     return ipcRenderer.invoke('open-main-app');
   },
 
+  /**
+   * Arreglar series existentes que no tienen el campo episodes
+   * @returns {Promise<Object>} Resultado de la corrección
+   */
+  fixExistingShows: () => {
+    console.log('Preload: Arreglando series existentes sin episodes');
+    return ipcRenderer.invoke('fix-existing-shows');
+  },
+
   // ==============================================
   // Utilidades y Helpers
   // ==============================================

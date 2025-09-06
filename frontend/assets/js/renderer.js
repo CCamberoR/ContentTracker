@@ -1,5 +1,5 @@
 /**
- * renderer.js - Mi Brújula de Conocimiento
+ * renderer.js - Content Tracker
  * 
  * Frontend Logic Controller para la aplicación de seguimiento de contenido.
  * Este archivo maneja toda la lógica de la interfaz de usuario en el proceso renderer de Electron.
@@ -15,7 +15,7 @@ let currentRating = 0;
  * Inicialización de la aplicación cuando el DOM esté completamente cargado
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Mi Brújula de Conocimiento iniciada');
+    console.log('🚀 Content Tracker iniciado');
     
     // Verificar que la API esté disponible
     if (!window.api) {
@@ -113,7 +113,7 @@ async function renderDashboardView() {
     contentDiv.innerHTML = `
         <div class="view-container">
             <div class="view-header">
-                <h2 class="view-title">📊 Mi Brújula de Conocimiento</h2>
+                <h2 class="view-title">📊 Content Tracker</h2>
                 <p class="view-description">Analiza tu progreso y descubre patrones en tu aprendizaje</p>
             </div>
             
@@ -142,6 +142,16 @@ async function renderDashboardView() {
                     <span class="stat-number" id="this-month">0</span>
                     <span class="stat-label">Este Mes</span>
                 </div>
+            </div>
+            
+            <!-- Botón de corrección temporal -->
+            <div style="text-align: center; margin: 20px 0;">
+                <button id="fix-series-btn" class="btn btn-secondary" style="background: #f39c12; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                    🔧 Corregir Series Antiguas (episodios faltantes)
+                </button>
+                <small style="display: block; margin-top: 5px; color: #666;">
+                    Solo necesario una vez para arreglar series creadas antes de la corrección
+                </small>
             </div>
             
             <!-- Gráficos de Análisis -->
@@ -198,6 +208,12 @@ async function loadDashboardData() {
             loadProgressChart()
         ]);
         
+        // Agregar event listener para el botón de corrección
+        const fixSeriesBtn = document.getElementById('fix-series-btn');
+        if (fixSeriesBtn) {
+            fixSeriesBtn.addEventListener('click', handleFixExistingShows);
+        }
+        
     } catch (error) {
         console.error('Error cargando datos del dashboard:', error);
         showNotification('Error cargando estadísticas', 'error');
@@ -229,7 +245,7 @@ function renderAddContentView() {
         <div class="view-container">
             <div class="view-header">
                 <h2 class="view-title">➕ Añadir Nuevo Contenido</h2>
-                <p class="view-description">Registra un nuevo elemento en tu brújula de conocimiento</p>
+                <p class="view-description">Registra un nuevo elemento en Content Tracker</p>
             </div>
             
             <div class="form-container">
@@ -254,16 +270,13 @@ function renderAddContentView() {
                             <label class="form-label" for="type">Tipo de Contenido *</label>
                             <select id="type" name="type" class="form-select" required>
                                 <option value="">Selecciona el tipo</option>
-                                <option value="libro">📚 Libro</option>
-                                <option value="audiobook">🎧 Audiolibro</option>
-                                <option value="podcast">�️ Podcast</option>
+                                <option value="book">📚 Libro</option>
+                                                        <option value="course">� Cursos</option>
+                                <option value="article">� Artículo</option>
+                                <option value="course">🎓 Curso</option>
                                 <option value="video">� Video</option>
-                                <option value="pelicula">� Película</option>
-                                <option value="serie">📺 Serie</option>
-                                <option value="curso">🎓 Curso</option>
-                                <option value="articulo">📄 Artículo</option>
-                                <option value="documental">�️ Documental</option>
-                                <option value="paper">📄 Paper Académico</option>
+                                <option value="show">📺 Serie</option>
+                                <option value="movie">🎬 Película</option>
                             </select>
                         </div>
                         
@@ -305,6 +318,13 @@ function renderAddContentView() {
                             </div>
                             
                             <div class="form-group">
+                                <label class="form-label" for="episodes">Episodios</label>
+                                <input type="number" id="episodes" name="episodes" class="form-input" 
+                                       min="0" placeholder="Ej: 12">
+                                <small class="form-helper">Para series y podcasts</small>
+                            </div>
+                            
+                            <div class="form-group">
                                 <label class="form-label" for="duration_mins">Duración (minutos)</label>
                                 <input type="number" id="duration_mins" name="duration_mins" class="form-input" 
                                        min="0" placeholder="Ej: 90">
@@ -338,12 +358,6 @@ function renderAddContentView() {
                                       placeholder="Comparte tus reflexiones, aprendizajes clave, citas favoritas..."></textarea>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="form-label" for="url">URL / Enlace</label>
-                            <input type="url" id="url" name="url" class="form-input" 
-                                   placeholder="https://ejemplo.com/enlace-al-contenido">
-                            <small class="form-helper">Enlace al contenido original (opcional)</small>
-                        </div>
                     </div>
                     
                     <!-- Botones de Acción -->
@@ -404,14 +418,17 @@ async function renderLibraryView() {
                 <div class="filter-container">
                     <select id="type-filter" class="filter-select">
                         <option value="">Todos los tipos</option>
-                        <option value="libro">📚 Libros</option>
-                        <option value="podcast">🎧 Podcasts</option>
-                        <option value="articulo">📰 Artículos</option>
-                        <option value="curso">🎓 Cursos</option>
-                        <option value="video">🎬 Videos</option>
-                        <option value="audiobook">🔊 Audiolibros</option>
-                        <option value="paper">📄 Papers</option>
-                        <option value="documental">🎭 Documentales</option>
+                        <option value="book">📚 Libros</option>
+                        <option value="article">📄 Artículos</option>
+                        <option value="podcast">�️ Podcasts</option>
+                        <option value="video">� Videos</option>
+                        <option value="pelicula">� Películas</option>
+                        <option value="show">📺 Series</option>
+                        <option value="movie">🎬 Películas</option>
+
+
+                        <option value="documental">� Documentales</option>
+
                     </select>
                     
                     <select id="rating-filter" class="filter-select">
@@ -449,7 +466,7 @@ async function renderLibraryView() {
                     <div class="empty-state-icon">📚</div>
                     <h3 class="empty-state-title">No hay contenido registrado</h3>
                     <p class="empty-state-description">
-                        Comienza tu brújula de conocimiento agregando tu primer elemento
+                        Comienza tu Content Tracker agregando tu primer elemento
                     </p>
                 </div>
             </div>
@@ -535,35 +552,112 @@ function setupStarRating() {
  */
 function handleContentTypeChange() {
     const contentType = document.getElementById('type').value;
-    const pagesField = document.querySelector('.form-group:has(#pages)');
-    const durationField = document.querySelector('.form-group:has(#duration_mins)');
+    console.log('Tipo seleccionado:', contentType); // Debug
     
-    // Ocultar todos los campos específicos por defecto
-    if (pagesField) pagesField.style.display = 'none';
-    if (durationField) durationField.style.display = 'none';
+    // Buscar los campos usando getElementById directamente (más confiable)
+    const pagesInput = document.getElementById('pages');
+    const episodesInput = document.getElementById('episodes');
+    const durationInput = document.getElementById('duration_mins');
     
-    // Mostrar campos según el tipo
+    const pagesField = pagesInput ? pagesInput.closest('.form-group') : null;
+    const episodesField = episodesInput ? episodesInput.closest('.form-group') : null;
+    const durationField = durationInput ? durationInput.closest('.form-group') : null;
+    
+    // Ocultar todos los campos específicos por defecto y limpiar requerimientos
+    if (pagesField) {
+        pagesField.style.display = 'none';
+        const pagesInput = document.getElementById('pages');
+        if (pagesInput) {
+            pagesInput.required = false;
+            pagesInput.placeholder = "Ej: 250";
+        }
+        console.log('Ocultando campo páginas');
+    }
+    if (episodesField) {
+        episodesField.style.display = 'none';
+        const episodesInput = document.getElementById('episodes');
+        if (episodesInput) {
+            episodesInput.required = false;
+            episodesInput.placeholder = "Ej: 12";
+        }
+        console.log('Ocultando campo episodios');
+    }
+    if (durationField) {
+        durationField.style.display = 'none';
+        const durationInput = document.getElementById('duration_mins');
+        if (durationInput) {
+            durationInput.required = false;
+            durationInput.placeholder = "Ej: 90";
+        }
+        console.log('Ocultando campo duración');
+    }
+    
+    // Mostrar campos según el tipo (usamos los valores del frontend)
     switch(contentType) {
-        case 'libro':
-        case 'paper':
-            if (pagesField) pagesField.style.display = 'block';
+        case 'book':
+        case 'article':
+            if (pagesField) {
+                pagesField.style.display = 'block';
+                console.log('Mostrando campo páginas para:', contentType);
+            }
+            break;
+        case 'show':  // Cambiado de 'serie' a 'show'
+        case 'podcast':
+            if (episodesField) {
+                episodesField.style.display = 'block';
+                console.log('Mostrando campo episodios para:', contentType);
+                
+                // Hacer obligatorios los campos para series
+                if (contentType === 'show') {
+                    const episodesInput = document.getElementById('episodes');
+                    const durationInput = document.getElementById('duration_mins');
+                    
+                    if (episodesInput) {
+                        episodesInput.required = true;
+                        episodesInput.placeholder = "Ej: 400 (obligatorio para series)";
+                    }
+                    if (durationInput) {
+                        durationInput.required = true;
+                        durationInput.placeholder = "Ej: 25 (minutos por episodio - obligatorio)";
+                    }
+                } else {
+                    // Para podcasts, no obligatorios
+                    const episodesInput = document.getElementById('episodes');
+                    const durationInput = document.getElementById('duration_mins');
+                    
+                    if (episodesInput) {
+                        episodesInput.required = false;
+                        episodesInput.placeholder = "Ej: 12";
+                    }
+                    if (durationInput) {
+                        durationInput.required = false;
+                        durationInput.placeholder = "Ej: 90";
+                    }
+                }
+            }
+            if (durationField) {
+                durationField.style.display = 'block';
+                console.log('Mostrando campo duración para:', contentType);
+            }
             break;
         case 'video':
-        case 'curso':
-        case 'podcast':
-        case 'audiobook':
-        case 'documental':
-        case 'pelicula':
-        case 'serie':
-            if (durationField) durationField.style.display = 'block';
+        case 'movie':
+        case 'course':
+            if (durationField) {
+                durationField.style.display = 'block';
+                console.log('Mostrando campo duración para:', contentType);
+            }
             break;
-        case 'articulo':
-        case 'blog':
-            // Estos tipos no requieren páginas ni duración específica
-            break;
+        default:
+            console.log('Tipo no reconocido:', contentType);
     }
 }
 
+/**
+ * Mapear tipos del frontend al backend
+ * @param {string} frontendType - Tipo usado en el frontend
+ * @returns {string} - Tipo usado en el backend
+ */
 /**
  * Manejar envío del formulario de agregar contenido
  */
@@ -577,15 +671,15 @@ async function handleAddContentSubmit(event) {
     const itemData = {
         title: formData.get('title'),
         author: formData.get('author'),
-        type: formData.get('type'),
+        type: formData.get('type'), // Sin mapeo, usar directamente
         start_date: formData.get('start_date'),
         end_date: formData.get('end_date'),
         pages: formData.get('pages') ? parseInt(formData.get('pages')) : null,
+        episodes: formData.get('episodes') ? parseInt(formData.get('episodes')) : null,
         duration_mins: formData.get('duration_mins') ? parseInt(formData.get('duration_mins')) : null,
         genre: formData.get('genre'),
         rating: formData.get('rating') ? parseInt(formData.get('rating')) : null,
-        notes: formData.get('notes'),
-        url: formData.get('url')
+        notes: formData.get('notes')
     };
     
     try {
@@ -611,9 +705,10 @@ async function handleAddContentSubmit(event) {
             });
             document.getElementById('rating-text').textContent = 'Sin valoración';
             
-            // Volver al dashboard después de 1.5 segundos
-            setTimeout(() => {
+            // Volver al dashboard después de 1.5 segundos y recargar datos
+            setTimeout(async () => {
                 switchView('dashboard');
+                await loadDashboardData(); // Recargar datos del dashboard
             }, 1500);
         } else {
             throw new Error(response.error || 'Error desconocido');
@@ -678,7 +773,7 @@ function renderLibraryTable(data) {
             <td>${escapeHtml(item.author || 'Sin autor')}</td>
             <td>
                 <span class="content-type-badge type-${item.type}">
-                    ${getTypeIcon(item.type)} ${capitalizeFirst(item.type)}
+                    ${getTypeIcon(item.type)} ${getTypeDisplayName(item.type)}
                 </span>
             </td>
             <td>${escapeHtml(item.genre || 'Sin género')}</td>
@@ -1050,6 +1145,25 @@ function escapeHtml(text) {
 /**
  * Capitalizar primera letra
  */
+/**
+ * Obtener el nombre en español del tipo de contenido
+ * @param {string} type - Tipo de contenido (backend o frontend)
+ * @returns {string} - Nombre en español del tipo
+ */
+function getTypeDisplayName(type) {
+    const typeNames = {
+        'book': 'Libro',
+        'podcast': 'Podcast',
+        'article': 'Artículo',
+        'course': 'Curso',
+        'video': 'Video',
+        'show': 'Serie',
+        'movie': 'Película'
+    };
+    
+    return typeNames[type] || capitalizeFirst(type);
+}
+
 function capitalizeFirst(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -1082,16 +1196,16 @@ function formatMonth(monthString) {
  */
 function getTypeIcon(type) {
     const icons = {
-        'libro': '📚',
-        'podcast': '🎧',
-        'articulo': '📰',
-        'curso': '🎓',
-        'video': '🎬',
-        'audiobook': '🔊',
-        'paper': '📄',
-        'documental': '🎭',
-        'pelicula': '🎬',
-        'serie': '📺'
+        'book': '📚',
+        'podcast': '�️',
+        'articulo': '�',
+        'course': '🎓',
+        'video': '📹',
+        'movie': '�',
+
+        'documental': '�',
+
+        'show': '📺'
     };
     return icons[type] || '📄';
 }
@@ -1114,9 +1228,25 @@ function renderProgress(item) {
         parts.push(`${item.pages} páginas`);
     }
     
+    if (item.episodes) {
+        parts.push(`${item.episodes} episodios`);
+    }
+    
     if (item.duration_mins) {
-        const hours = Math.round(item.duration_mins / 60 * 10) / 10;
-        parts.push(`${hours}h`);
+        // Para series: calcular tiempo total y mostrar en horas
+        if (item.type === 'show' && item.episodes) {
+            const totalMinutes = item.duration_mins * item.episodes;
+            const hours = Math.round(totalMinutes / 60 * 10) / 10;
+            parts.push(`${hours}h total`);
+        } else {
+            // Para otros tipos: mostrar minutos directos o convertir a horas si es > 60
+            if (item.duration_mins >= 60) {
+                const hours = Math.round(item.duration_mins / 60 * 10) / 10;
+                parts.push(`${hours}h`);
+            } else {
+                parts.push(`${item.duration_mins} min`);
+            }
+        }
     }
     
     if (parts.length === 0) {
@@ -1156,4 +1286,46 @@ async function deleteContentItem(id) {
 function editContentItem(id) {
     showNotification('Función de edición próximamente disponible', 'info');
     // TODO: Implementar modal de edición
+}
+
+/**
+ * Corregir series existentes que no tienen episodes
+ */
+async function handleFixExistingShows() {
+    const button = document.getElementById('fix-series-btn');
+    
+    if (!confirm('¿Estás seguro de que quieres corregir las series existentes? Esto asignará valores estimados de episodios basados en la duración.')) {
+        return;
+    }
+    
+    try {
+        // Deshabilitar botón durante la operación
+        button.disabled = true;
+        button.textContent = '🔄 Corrigiendo...';
+        
+        const response = await window.api.fixExistingShows();
+        
+        if (response.success) {
+            showNotification(response.message, 'success');
+            console.log('Series corregidas:', response);
+            
+            // Recargar datos del dashboard
+            await loadDashboardData();
+            
+            // Ocultar el botón ya que la corrección solo se necesita una vez
+            button.style.display = 'none';
+            button.parentElement.style.display = 'none';
+            
+        } else {
+            throw new Error(response.error || 'Error corrigiendo series');
+        }
+        
+    } catch (error) {
+        console.error('Error corrigiendo series:', error);
+        showNotification('Error al corregir series existentes', 'error');
+        
+        // Restaurar botón en caso de error
+        button.disabled = false;
+        button.textContent = '🔧 Corregir Series Antiguas (episodios faltantes)';
+    }
 }

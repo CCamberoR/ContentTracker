@@ -1,5 +1,5 @@
 /**
- * login.js - Gestión de autenticación para Mi Brújula de Conocimiento
+ * login.js - Gestión de autenticación para Content Tracker
  */
 
 // Variables globales
@@ -89,6 +89,9 @@ async function handleLogin(e) {
         if (response.success) {
             currentUser = response.user;
             showMessage(`¡Bienvenido, ${response.user.username}!`, 'success');
+            
+            // Remover opción de sesión guardada anterior si existe
+            removeSavedSessionOption();
             
             // Guardar sesión localmente
             localStorage.setItem('currentUser', JSON.stringify(response.user));
@@ -183,16 +186,10 @@ function checkExistingSession() {
         try {
             currentUser = JSON.parse(savedUser);
             console.log('Sesión existente encontrada:', currentUser.username);
-            showMessage(`Sesión activa para ${currentUser.username}`, 'info');
             
-            // Dar opción de continuar o cerrar sesión
-            setTimeout(() => {
-                if (confirm(`¿Continuar como ${currentUser.username}?`)) {
-                    redirectToMainApp();
-                } else {
-                    logout();
-                }
-            }, 1000);
+            // Mostrar información de sesión existente sin autoconfirmar
+            showSavedUserOption(currentUser);
+            
         } catch (error) {
             console.error('Error al recuperar sesión:', error);
             localStorage.removeItem('currentUser');
@@ -200,10 +197,55 @@ function checkExistingSession() {
     }
 }
 
+function showSavedUserOption(user) {
+    // Crear un elemento para mostrar la opción de sesión guardada
+    const savedSessionDiv = document.createElement('div');
+    savedSessionDiv.id = 'savedSession';
+    savedSessionDiv.className = 'saved-session';
+    savedSessionDiv.innerHTML = `
+        <div class="saved-session-content">
+            <p>Sesión guardada: <strong>${user.username}</strong></p>
+            <div class="saved-session-buttons">
+                <button type="button" class="btn btn-primary btn-sm" id="continueSavedSession">
+                    Continuar como ${user.username}
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" id="clearSavedSession">
+                    Usar otro usuario
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Insertar antes del primer formulario
+    const loginForms = document.querySelector('.login-forms');
+    loginForms.insertBefore(savedSessionDiv, loginForms.firstChild);
+    
+    // Agregar event listeners
+    document.getElementById('continueSavedSession').addEventListener('click', () => {
+        showMessage(`Continuando como ${user.username}...`, 'success');
+        setTimeout(() => {
+            redirectToMainApp();
+        }, 500);
+    });
+    
+    document.getElementById('clearSavedSession').addEventListener('click', () => {
+        logout();
+        removeSavedSessionOption();
+    });
+}
+
+function removeSavedSessionOption() {
+    const savedSessionDiv = document.getElementById('savedSession');
+    if (savedSessionDiv) {
+        savedSessionDiv.remove();
+    }
+}
+
 function logout() {
     currentUser = null;
     localStorage.removeItem('currentUser');
     clearMessage();
+    removeSavedSessionOption();
     showLoginForm();
 }
 
