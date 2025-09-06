@@ -341,4 +341,4 @@ dist/
 Scripts de instalación de software necesario
 
 # Database files
-.db
+*.db
