@@ -412,14 +412,6 @@ function renderEditContentView() {
 // VISTA: ELIMINAR CONTENIDO
 // ==============================================
 
-/**
- * Renderizar la vista de eliminar contenido
- */
-function renderDeleteContentView() {
-    console.log('➕ Renderizando Delete Content');
-    // TODO: Implementar la funcionalidad de eliminación
-}
-
 // ==============================================
 // VISTA: BIBLIOTECA
 // ==============================================
