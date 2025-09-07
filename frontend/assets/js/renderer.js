@@ -144,16 +144,6 @@ async function renderDashboardView() {
                 </div>
             </div>
             
-            <!-- Botón de corrección temporal -->
-            <div style="text-align: center; margin: 20px 0;">
-                <button id="fix-series-btn" class="btn btn-secondary" style="background: #f39c12; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                    🔧 Corregir Series Antiguas (episodios faltantes)
-                </button>
-                <small style="display: block; margin-top: 5px; color: #666;">
-                    Solo necesario una vez para arreglar series creadas antes de la corrección
-                </small>
-            </div>
-            
             <!-- Gráficos de Análisis -->
             <div class="charts-grid">
                 <div class="chart-container">

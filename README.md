@@ -1,4 +1,4 @@
-# 🧭 Mi Brújula de Conocimiento - ContentTracker
+# 🧭 Mi Brújula de Conocimiento - ContentTracker v1.0.0
 
 Una aplicación de escritorio moderna para gestionar y rastrear tu viaje de aprendizaje personal. Desde libros y audiolibros hasta podcasts y cursos, mantén organizados todos tus recursos de conocimiento en un solo lugar.
 
@@ -164,15 +164,15 @@ ContentTracker/
 
 | Tipo | Icono | Métricas | Campos Específicos |
 |------|-------|----------|-------------------|
-| Libro | 📚 | Páginas | Páginas totales/leídas |
-| Audiolibro | 🎧 | Duración | Minutos de audio |
-| Podcast | 🎙️ | Duración | Episodios y duración |
+| **Libro** | 📚 | Páginas | Páginas totales/leídas |
+| **Audiolibro** | 🎧 | Duración | Minutos de audio |
+| **Podcast** | 🎙️ | Duración | Episodios y duración |
 | **Video** | 📹 | Duración | Minutos de video |
 | **Película** | 🎬 | Duración | Minutos de película |
 | **Serie** | 📺 | Duración | Episodios y duración |
-| Curso | 🎓 | Duración | Horas del curso |
-| Artículo | 📄 | Páginas | Páginas estimadas |
-| Documental | 🎬 | Duración | Minutos del documental |
+| **Curso** | 🎓 | Duración | Horas del curso |
+| **Artículo** | 📄 | Páginas | Páginas estimadas |
+| **Documental** | 🎬 | Duración | Minutos del documental |
 
 ## 📊 Métricas y Estadísticas
 
@@ -182,7 +182,7 @@ ContentTracker/
 - **Páginas totales** leídas
 - **Horas de audio/video** consumidas
 
-### Visualizaciones Avanzadas
+### Visualizaciones Avanzadas (En proceso)
 - **Gráfico de barras**: Distribución por tipo de contenido
 - **Gráfico temporal**: Evolución mensual de tu aprendizaje
 - **Top 5 géneros**: Tus áreas de interés principales
@@ -205,8 +205,23 @@ npm install
 # Ejecutar en modo desarrollo
 npm start
 
+# Ejecutar con logging habilitado
+npm run dev
+
+# Construir la aplicación
+npm run build
+
+# Crear distribución
+npm run dist
+
+# Empaquetar sin distribución
+npm run pack
+
 # Limpiar cache (si hay problemas)
 npm run clean
+
+# Configuración completa
+npm run setup
 
 # Verificar dependencias
 npm list
@@ -241,6 +256,24 @@ npm list
 - [ ] **Sistema de etiquetas** avanzado
 - [ ] **Recomendaciones** basadas en historial
 
+## 📋 Historial de Versiones
+
+### v1.0.0 (Septiembre 2025)
+- **Lanzamiento inicial estable**
+- ✅ Sistema completo de autenticación de usuarios
+- ✅ Dashboard con estadísticas y gráficos interactivos (En proceso)
+- ✅ Gestión completa de 9 tipos de contenido
+- ✅ Búsqueda y filtros avanzados
+- ✅ Base de datos SQLite local
+- ✅ Interfaz responsive y moderna
+- ✅ Métricas de progreso anual y mensual (En proceso)
+- ✅ Sistema de valoraciones con estrellas
+- ✅ Notas personales para cada ítem
+- ✅ Soporte completo para series con episodios
+- ✅ Cálculos automáticos de tiempo total
+- 🔧 Eliminación de herramientas de corrección temporales
+- 🔧 Optimización de código y limpieza de logs de desarrollo
+
 ##  Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
@@ -252,4 +285,5 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ---
 
-**Content Tracker** - Navega tu viaje de aprendizaje con confianza 🧭✨
+**Content Tracker v1.0.0** - Navega tu viaje de aprendizaje con confianza 🧭✨  
+*Actualizado: Septiembre 2025*
