@@ -177,7 +177,29 @@ async function renderDashboardView() {
                 </div>
                 
                 <div class="chart-container" style="grid-column: 1 / -1;">
-                    <h3 class="chart-title">📈 Progreso Anual Acumulativo</h3>
+                    <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 class="chart-title">📈 Progreso Anual Acumulativo</h3>
+                        <div class="chart-controls" style="display: flex; gap: 10px; align-items: center;">
+                            <label for="progress-year-filter" style="font-size: 14px; color: #666;">Año:</label>
+                            <select id="progress-year-filter" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                                <option value="">Cargando años...</option>
+                            </select>
+                            <label for="progress-metric-filter" style="font-size: 14px; color: #666;">Métrica:</label>
+                            <select id="progress-metric-filter" style="padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                                <option value="items">📊 Total Items</option>
+                                <option value="pages">📚 Páginas</option>
+                                <option value="hours">🕐 Horas</option>
+                                <option value="episodes">📺 Episodios</option>
+                                <option value="books">📖 Libros</option>
+                                <option value="series">📺 Series</option>
+                                <option value="movies">🎬 Películas</option>
+                                <option value="videos">📹 Videos</option>
+                                <option value="podcasts">🎧 Podcasts</option>
+                                <option value="articles">📄 Artículos</option>
+                                <option value="courses">🎓 Cursos</option>
+                            </select>
+                        </div>
+                    </div>
                     <canvas id="progress-chart"></canvas>
                 </div>
             </div>
@@ -207,12 +229,6 @@ async function loadDashboardData() {
             loadRatingsChart(),
             loadProgressChart()
         ]);
-        
-        // Agregar event listener para el botón de corrección
-        const fixSeriesBtn = document.getElementById('fix-series-btn');
-        if (fixSeriesBtn) {
-            fixSeriesBtn.addEventListener('click', handleFixExistingShows);
-        }
         
     } catch (error) {
         console.error('Error cargando datos del dashboard:', error);
@@ -271,10 +287,10 @@ function renderAddContentView() {
                             <select id="type" name="type" class="form-select" required>
                                 <option value="">Selecciona el tipo</option>
                                 <option value="book">📚 Libro</option>
-                                                        <option value="course">� Cursos</option>
-                                <option value="article">� Artículo</option>
+                                <option value="article">📄 Artículo</option>
+                                <option value="podcast">🎧 Podcast</option>
                                 <option value="course">🎓 Curso</option>
-                                <option value="video">� Video</option>
+                                <option value="video">📹 Video</option>
                                 <option value="show">📺 Serie</option>
                                 <option value="movie">🎬 Película</option>
                             </select>
@@ -444,14 +460,12 @@ async function renderLibraryView() {
                         <option value="">Todos los tipos</option>
                         <option value="book">📚 Libros</option>
                         <option value="article">📄 Artículos</option>
-                        <option value="podcast">�️ Podcasts</option>
-                        <option value="video">� Videos</option>
-                        <option value="pelicula">� Películas</option>
+                        <option value="podcast">🎧 Podcasts</option>
+                        <option value="video">📹 Videos</option>
+                        <option value="course">🎓 Cursos</option>
                         <option value="show">📺 Series</option>
                         <option value="movie">🎬 Películas</option>
-
-
-                        <option value="documental">� Documentales</option>
+                    </select>
 
                     </select>
                     
@@ -682,6 +696,27 @@ function handleContentTypeChange() {
  * @param {string} frontendType - Tipo usado en el frontend
  * @returns {string} - Tipo usado en el backend
  */
+
+/**
+ * Obtener el ID del usuario actual desde localStorage
+ * @returns {number} ID del usuario logueado
+ */
+function getCurrentUserId() {
+    try {
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            const user = JSON.parse(currentUser);
+            return user.id;
+        }
+    } catch (error) {
+        console.error('Error obteniendo usuario actual:', error);
+    }
+    
+    // Fallback al usuario 1 si no hay sesión
+    console.warn('No se encontró usuario logueado, usando usuario por defecto (ID: 1)');
+    return 1;
+}
+
 /**
  * Manejar envío del formulario de agregar contenido
  */
@@ -703,7 +738,8 @@ async function handleAddContentSubmit(event) {
         duration_mins: formData.get('duration_mins') ? parseInt(formData.get('duration_mins')) : null,
         genre: formData.get('genre'),
         rating: formData.get('rating') ? parseInt(formData.get('rating')) : null,
-        notes: formData.get('notes')
+        notes: formData.get('notes'),
+        userid: getCurrentUserId() // Obtener del usuario logueado
     };
     
     try {
@@ -916,12 +952,107 @@ async function loadRatingsChart() {
  */
 async function loadProgressChart() {
     try {
-        const response = await window.api.getAnnualProgress();
+        // Cargar años disponibles
+        await loadAvailableYears();
+        
+        // Cargar progreso del año actual por defecto
+        const currentYear = new Date().getFullYear();
+        const response = await window.api.getAnnualProgress(currentYear);
         if (response.success) {
-            renderProgressChart(response.data);
+            renderProgressChart(response.data, 'items'); // Métrica por defecto: items
         }
+        
+        // Configurar event listeners para filtros
+        setupProgressChartFilters();
+        
     } catch (error) {
         console.error('Error cargando gráfico de progreso:', error);
+    }
+}
+
+/**
+ * Cargar años disponibles en el selector
+ */
+async function loadAvailableYears() {
+    try {
+        const response = await window.api.getAvailableYears();
+        if (response.success) {
+            const yearSelect = document.getElementById('progress-year-filter');
+            const currentYear = new Date().getFullYear();
+            
+            // Limpiar opciones
+            yearSelect.innerHTML = '';
+            
+            // Si no hay años, mostrar año actual
+            if (response.data.length === 0) {
+                yearSelect.innerHTML = `<option value="${currentYear}">${currentYear} (Sin datos)</option>`;
+                return;
+            }
+            
+            // Agregar años disponibles
+            response.data.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            });
+            
+            // Si el año actual no está en la lista, agregarlo
+            if (!response.data.includes(currentYear)) {
+                const option = document.createElement('option');
+                option.value = currentYear;
+                option.textContent = `${currentYear} (Sin datos)`;
+                option.selected = true;
+                yearSelect.appendChild(option);
+            }
+        }
+    } catch (error) {
+        console.error('Error cargando años disponibles:', error);
+        // Fallback al año actual
+        const yearSelect = document.getElementById('progress-year-filter');
+        const currentYear = new Date().getFullYear();
+        yearSelect.innerHTML = `<option value="${currentYear}">${currentYear}</option>`;
+    }
+}
+
+/**
+ * Configurar event listeners para los filtros del gráfico de progreso
+ */
+function setupProgressChartFilters() {
+    const yearFilter = document.getElementById('progress-year-filter');
+    const metricFilter = document.getElementById('progress-metric-filter');
+    
+    if (yearFilter) {
+        yearFilter.addEventListener('change', async () => {
+            const selectedYear = parseInt(yearFilter.value);
+            const selectedMetric = metricFilter.value;
+            await updateProgressChart(selectedYear, selectedMetric);
+        });
+    }
+    
+    if (metricFilter) {
+        metricFilter.addEventListener('change', async () => {
+            const selectedYear = parseInt(yearFilter.value);
+            const selectedMetric = metricFilter.value;
+            await updateProgressChart(selectedYear, selectedMetric);
+        });
+    }
+}
+
+/**
+ * Actualizar gráfico de progreso con filtros
+ */
+async function updateProgressChart(year, metric) {
+    try {
+        const response = await window.api.getAnnualProgress(year);
+        if (response.success) {
+            renderProgressChart(response.data, metric);
+        }
+    } catch (error) {
+        console.error('Error actualizando gráfico de progreso:', error);
     }
 }
 
@@ -1078,63 +1209,205 @@ function renderRatingsChart(data) {
     charts.ratings = chart;
 }
 
-function renderProgressChart(data) {
-    const ctx = document.getElementById('progress-chart').getContext('2d');
+function renderProgressChart(data, selectedMetric = 'items') {
+    const ctx = document.getElementById('progress-chart');
     
-    const chart = new Chart(ctx, {
+    // Destruir gráfico existente si existe
+    if (window.progressChart) {
+        window.progressChart.destroy();
+    }
+    
+    // Configuración de métricas disponibles
+    const metricConfig = {
+        items: { 
+            field: 'cumulativeItems', 
+            label: 'Total Items', 
+            color: 'rgba(52, 152, 219, 1)', 
+            bgColor: 'rgba(52, 152, 219, 0.1)',
+            icon: '📊'
+        },
+        pages: { 
+            field: 'cumulativePages', 
+            label: 'Páginas', 
+            color: 'rgba(102, 126, 234, 1)', 
+            bgColor: 'rgba(102, 126, 234, 0.1)',
+            icon: '📚'
+        },
+        hours: { 
+            field: 'cumulativeHours', 
+            label: 'Horas', 
+            color: 'rgba(118, 75, 162, 1)', 
+            bgColor: 'rgba(118, 75, 162, 0.1)',
+            icon: '🕐'
+        },
+        episodes: { 
+            field: 'cumulativeEpisodes', 
+            label: 'Episodios', 
+            color: 'rgba(231, 76, 60, 1)', 
+            bgColor: 'rgba(231, 76, 60, 0.1)',
+            icon: '📺'
+        },
+        books: { 
+            field: 'cumulativeBooks', 
+            label: 'Libros', 
+            color: 'rgba(46, 204, 113, 1)', 
+            bgColor: 'rgba(46, 204, 113, 0.1)',
+            icon: '📖'
+        },
+        series: { 
+            field: 'cumulativeSeries', 
+            label: 'Series', 
+            color: 'rgba(155, 89, 182, 1)', 
+            bgColor: 'rgba(155, 89, 182, 0.1)',
+            icon: '📺'
+        },
+        movies: { 
+            field: 'cumulativeMovies', 
+            label: 'Películas', 
+            color: 'rgba(230, 126, 34, 1)', 
+            bgColor: 'rgba(230, 126, 34, 0.1)',
+            icon: '🎬'
+        },
+        videos: { 
+            field: 'cumulativeVideos', 
+            label: 'Videos', 
+            color: 'rgba(241, 196, 15, 1)', 
+            bgColor: 'rgba(241, 196, 15, 0.1)',
+            icon: '📹'
+        },
+        podcasts: { 
+            field: 'cumulativePodcasts', 
+            label: 'Podcasts', 
+            color: 'rgba(26, 188, 156, 1)', 
+            bgColor: 'rgba(26, 188, 156, 0.1)',
+            icon: '🎧'
+        },
+        articles: { 
+            field: 'cumulativeArticles', 
+            label: 'Artículos', 
+            color: 'rgba(52, 73, 94, 1)', 
+            bgColor: 'rgba(52, 73, 94, 0.1)',
+            icon: '📄'
+        },
+        courses: { 
+            field: 'cumulativeCourses', 
+            label: 'Cursos', 
+            color: 'rgba(192, 57, 43, 1)', 
+            bgColor: 'rgba(192, 57, 43, 0.1)',
+            icon: '🎓'
+        }
+    };
+    
+    const config = metricConfig[selectedMetric];
+    if (!config) {
+        console.error('Métrica no válida:', selectedMetric);
+        return;
+    }
+    
+    // Si no hay datos, mostrar mensaje
+    if (!data || data.length === 0) {
+        ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+        const context = ctx.getContext('2d');
+        context.font = '16px Arial';
+        context.fillStyle = '#666';
+        context.textAlign = 'center';
+        context.fillText('No hay datos para mostrar', ctx.width / 2, ctx.height / 2);
+        return;
+    }
+    
+    window.progressChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.map(d => formatMonth(d.month)),
             datasets: [{
-                label: 'Páginas Acumuladas',
-                data: data.map(d => d.cumulativePages),
-                borderColor: 'rgba(102, 126, 234, 1)',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                fill: true,
-                tension: 0.4
-            }, {
-                label: 'Horas Acumuladas',
-                data: data.map(d => d.cumulativeHours),
-                borderColor: 'rgba(118, 75, 162, 1)',
-                backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                label: `${config.icon} ${config.label} Acumulados`,
+                data: data.map(d => d[config.field] || 0),
+                borderColor: config.color,
+                backgroundColor: config.bgColor,
                 fill: true,
                 tension: 0.4,
-                yAxisID: 'y1'
+                pointBackgroundColor: config.color,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             interaction: {
                 mode: 'index',
                 intersect: false,
             },
-            scales: {
-                y: {
-                    type: 'linear',
+            plugins: {
+                legend: {
                     display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Páginas'
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
                     }
                 },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return `${context[0].label} ${data[0]?.year || ''}`;
+                        },
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            const monthlyData = data[context.dataIndex];
+                            const monthlyField = config.field.replace('cumulative', 'monthly');
+                            const monthlyValue = monthlyData[monthlyField] || 0;
+                            
+                            return [
+                                `${config.icon} Total acumulado: ${value}`,
+                                `📈 Este mes: +${monthlyValue}`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
                     title: {
                         display: true,
-                        text: 'Horas'
+                        text: 'Mes',
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
                     },
                     grid: {
-                        drawOnChartArea: false,
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: config.label,
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        }
                     },
+                    ticks: {
+                        callback: function(value) {
+                            // Formatear números grandes
+                            if (value >= 1000) {
+                                return (value / 1000).toFixed(1) + 'k';
+                            }
+                            return value;
+                        }
+                    }
                 }
             }
         }
     });
-    
-    charts.progress = chart;
 }
 
 // ==============================================
@@ -1312,44 +1585,4 @@ function editContentItem(id) {
     // TODO: Implementar modal de edición
 }
 
-/**
- * Corregir series existentes que no tienen episodes
- */
-async function handleFixExistingShows() {
-    const button = document.getElementById('fix-series-btn');
-    
-    if (!confirm('¿Estás seguro de que quieres corregir las series existentes? Esto asignará valores estimados de episodios basados en la duración.')) {
-        return;
-    }
-    
-    try {
-        // Deshabilitar botón durante la operación
-        button.disabled = true;
-        button.textContent = '🔄 Corrigiendo...';
-        
-        const response = await window.api.fixExistingShows();
-        
-        if (response.success) {
-            showNotification(response.message, 'success');
-            console.log('Series corregidas:', response);
-            
-            // Recargar datos del dashboard
-            await loadDashboardData();
-            
-            // Ocultar el botón ya que la corrección solo se necesita una vez
-            button.style.display = 'none';
-            button.parentElement.style.display = 'none';
-            
-        } else {
-            throw new Error(response.error || 'Error corrigiendo series');
-        }
-        
-    } catch (error) {
-        console.error('Error corrigiendo series:', error);
-        showNotification('Error al corregir series existentes', 'error');
-        
-        // Restaurar botón en caso de error
-        button.disabled = false;
-        button.textContent = '🔧 Corregir Series Antiguas (episodios faltantes)';
-    }
-}
+

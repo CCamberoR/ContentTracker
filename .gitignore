@@ -342,3 +342,10 @@ Scripts de instalación de software necesario
 
 # Database files
 *.db
+*.sqlite
+*.sqlite3
+ContentTracker_database.db
+data/
+data/*.db
+data/*.sqlite
+data/*.sqlite3

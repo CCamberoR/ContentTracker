@@ -139,11 +139,21 @@ contextBridge.exposeInMainWorld('api', {
 
   /**
    * Obtener progreso anual acumulativo
+   * @param {number} year - Año para filtrar (opcional)
    * @returns {Promise<Object>} Progreso acumulativo de páginas y horas por mes
    */
-  getAnnualProgress: () => {
-    console.log('Preload: Solicitando progreso anual');
-    return ipcRenderer.invoke('get-annual-progress');
+  getAnnualProgress: (year = null) => {
+    console.log('Preload: Solicitando progreso anual para año:', year);
+    return ipcRenderer.invoke('get-annual-progress', year);
+  },
+
+  /**
+   * Obtener años disponibles para filtros
+   * @returns {Promise<Object>} Lista de años disponibles
+   */
+  getAvailableYears: () => {
+    console.log('Preload: Solicitando años disponibles');
+    return ipcRenderer.invoke('get-available-years');
   },
 
   // ==============================================
@@ -213,14 +223,7 @@ contextBridge.exposeInMainWorld('api', {
     return ipcRenderer.invoke('open-main-app');
   },
 
-  /**
-   * Arreglar series existentes que no tienen el campo episodes
-   * @returns {Promise<Object>} Resultado de la corrección
-   */
-  fixExistingShows: () => {
-    console.log('Preload: Arreglando series existentes sin episodes');
-    return ipcRenderer.invoke('fix-existing-shows');
-  },
+
 
   // ==============================================
   // Utilidades y Helpers

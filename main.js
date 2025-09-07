@@ -175,9 +175,9 @@ ipcMain.handle('create-content', async (event, itemData) => {
     const stmt = db.prepare(`
       INSERT INTO resources (
         title, author, type, start_date, end_date, 
-        pages, episodes, duration_mins, genre, rating, notes
+        pages, episodes, duration_mins, genre, rating, notes, userid
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     stmt.run(
@@ -187,11 +187,12 @@ ipcMain.handle('create-content', async (event, itemData) => {
       itemData.start_date,
       itemData.end_date || null,
       itemData.pages || null,
-      itemData.episodes || null,  // ¡ESTE CAMPO FALTABA!
+      itemData.episodes || null,
       itemData.duration_mins || null,
       itemData.genre || null,
       itemData.rating || null,
       itemData.notes || null,
+      itemData.userid || 1, // Fallback: usuario 1 si no se proporciona userid
       function(err) {
         if (err) {
           console.error('Error agregando contenido:', err.message);
@@ -254,7 +255,7 @@ ipcMain.handle('update-content', async (event, id, updatedItemData) => {
     const stmt = db.prepare(`
       UPDATE resources 
       SET title = ?, author = ?, type = ?, start_date = ?, end_date = ?,
-          pages = ?, episodes = ?, duration_mins = ?, genre = ?, rating = ?, notes = ?
+          pages = ?, episodes = ?, duration_mins = ?, genre = ?, rating = ?, notes = ?, userid = ?
       WHERE id = ?
     `);
     
@@ -270,6 +271,7 @@ ipcMain.handle('update-content', async (event, id, updatedItemData) => {
       updatedItemData.genre || null,
       updatedItemData.rating || null,
       updatedItemData.notes || null,
+      updatedItemData.userid || 1, // Fallback: usuario 1 si no se proporciona userid
       id,  // Usar el parámetro id en lugar de updatedItemData.id
       function(err) {
         if (err) {
@@ -585,12 +587,24 @@ ipcMain.handle('get-rating-distribution', async () => {
 /**
  * Obtener progreso anual (acumulación de páginas y minutos)
  */
-ipcMain.handle('get-annual-progress', async () => {
+ipcMain.handle('get-annual-progress', async (event, year = null) => {
   return new Promise((resolve) => {
+    // Si no se especifica año, usar el año actual
+    const targetYear = year || new Date().getFullYear();
+    
     db.all(`
       SELECT 
         strftime('%Y-%m', start_date) as month,
+        COUNT(*) as total_items,
         SUM(CASE WHEN pages IS NOT NULL THEN pages ELSE 0 END) as pages,
+        SUM(CASE WHEN episodes IS NOT NULL THEN episodes ELSE 0 END) as episodes,
+        COUNT(CASE WHEN type = 'video' THEN 1 END) as videos_count,
+        COUNT(CASE WHEN type = 'show' THEN 1 END) as series_count,
+        COUNT(CASE WHEN type = 'movie' THEN 1 END) as movies_count,
+        COUNT(CASE WHEN type = 'book' THEN 1 END) as books_count,
+        COUNT(CASE WHEN type = 'podcast' THEN 1 END) as podcasts_count,
+        COUNT(CASE WHEN type = 'article' THEN 1 END) as articles_count,
+        COUNT(CASE WHEN type = 'course' THEN 1 END) as courses_count,
         SUM(
           CASE 
             WHEN type = 'show' AND episodes IS NOT NULL AND duration_mins IS NOT NULL 
@@ -601,30 +615,88 @@ ipcMain.handle('get-annual-progress', async () => {
           END
         ) as minutes
       FROM resources 
-      WHERE strftime('%Y', start_date) = strftime('%Y', 'now')
+      WHERE strftime('%Y', start_date) = ?
       GROUP BY strftime('%Y-%m', start_date)
       ORDER BY month
-    `, (err, rows) => {
+    `, [targetYear.toString()], (err, rows) => {
       if (err) {
         console.error('Error obteniendo progreso anual:', err.message);
         resolve({ success: false, error: err.message });
       } else {
-        // Calcular acumulación
+        // Calcular acumulación de todas las métricas
         let cumulativePages = 0;
         let cumulativeMinutes = 0;
+        let cumulativeEpisodes = 0;
+        let cumulativeItems = 0;
+        let cumulativeVideos = 0;
+        let cumulativeSeries = 0;
+        let cumulativeMovies = 0;
+        let cumulativeBooks = 0;
+        let cumulativePodcasts = 0;
+        let cumulativeArticles = 0;
+        let cumulativeCourses = 0;
         
         const progressData = rows.map(row => {
           cumulativePages += row.pages;
           cumulativeMinutes += row.minutes;
+          cumulativeEpisodes += row.episodes;
+          cumulativeItems += row.total_items;
+          cumulativeVideos += row.videos_count;
+          cumulativeSeries += row.series_count;
+          cumulativeMovies += row.movies_count;
+          cumulativeBooks += row.books_count;
+          cumulativePodcasts += row.podcasts_count;
+          cumulativeArticles += row.articles_count;
+          cumulativeCourses += row.courses_count;
+          
           return {
             month: row.month,
+            year: targetYear,
+            // Métricas mensuales
+            monthlyPages: row.pages,
+            monthlyMinutes: row.minutes,
+            monthlyEpisodes: row.episodes,
+            monthlyItems: row.total_items,
+            // Métricas acumulativas
             cumulativePages: cumulativePages,
-            cumulativeHours: Math.round(cumulativeMinutes / 60 * 10) / 10
+            cumulativeHours: Math.round(cumulativeMinutes / 60 * 10) / 10,
+            cumulativeEpisodes: cumulativeEpisodes,
+            cumulativeItems: cumulativeItems,
+            cumulativeVideos: cumulativeVideos,
+            cumulativeSeries: cumulativeSeries,
+            cumulativeMovies: cumulativeMovies,
+            cumulativeBooks: cumulativeBooks,
+            cumulativePodcasts: cumulativePodcasts,
+            cumulativeArticles: cumulativeArticles,
+            cumulativeCourses: cumulativeCourses
           };
         });
         
-        console.log('Progreso anual:', progressData);
+        console.log(`Progreso anual ${targetYear}:`, progressData);
         resolve({ success: true, data: progressData });
+      }
+    });
+  });
+});
+
+/**
+ * Obtener años disponibles para el filtro de progreso anual
+ */
+ipcMain.handle('get-available-years', async () => {
+  return new Promise((resolve) => {
+    db.all(`
+      SELECT DISTINCT strftime('%Y', start_date) as year
+      FROM resources 
+      WHERE start_date IS NOT NULL
+      ORDER BY year DESC
+    `, (err, rows) => {
+      if (err) {
+        console.error('Error obteniendo años disponibles:', err.message);
+        resolve({ success: false, error: err.message });
+      } else {
+        const years = rows.map(row => parseInt(row.year)).filter(year => year && !isNaN(year));
+        console.log('Años disponibles:', years);
+        resolve({ success: true, data: years });
       }
     });
   });
@@ -807,73 +879,7 @@ ipcMain.handle('open-main-app', async () => {
   }
 });
 
-/**
- * Función temporal para arreglar registros existentes sin episodes
- */
-ipcMain.handle('fix-existing-shows', async () => {
-  return new Promise((resolve) => {
-    // Primero obtener todas las series que no tienen episodes o tienen episodes = null
-    db.all(`
-      SELECT id, title, duration_mins 
-      FROM resources 
-      WHERE type = 'show' AND (episodes IS NULL OR episodes = 0)
-    `, (err, rows) => {
-      if (err) {
-        console.error('Error obteniendo series sin episodes:', err.message);
-        resolve({ success: false, error: err.message });
-        return;
-      }
-      
-      console.log(`Encontradas ${rows.length} series sin campo episodes`);
-      
-      if (rows.length === 0) {
-        resolve({ success: true, message: 'No hay series que necesiten corrección' });
-        return;
-      }
-      
-      // Por cada serie, asignar un valor por defecto para episodes basado en la duración
-      // Esta es una estimación: si la duración es muy alta, probablemente tiene muchos episodios
-      let updated = 0;
-      let errors = 0;
-      
-      rows.forEach((row, index) => {
-        // Estimación: si tiene más de 60 minutos, probablemente son múltiples episodios
-        // Si tiene menos, probablemente es 1 episodio (película larga o episodio especial)
-        let estimatedEpisodes = 1;
-        if (row.duration_mins && row.duration_mins > 60) {
-          // Estimar basándose en episodios de ~25-45 minutos promedio
-          estimatedEpisodes = Math.max(1, Math.round(row.duration_mins / 30));
-        }
-        
-        const updateStmt = db.prepare(`
-          UPDATE resources 
-          SET episodes = ? 
-          WHERE id = ?
-        `);
-        
-        updateStmt.run(estimatedEpisodes, row.id, function(updateErr) {
-          if (updateErr) {
-            console.error(`Error actualizando serie ${row.title}:`, updateErr.message);
-            errors++;
-          } else {
-            console.log(`Actualizada serie "${row.title}" (ID: ${row.id}) con ${estimatedEpisodes} episodios estimados`);
-            updated++;
-          }
-          
-          // Si es el último elemento, resolver la promesa
-          if (index === rows.length - 1) {
-            resolve({ 
-              success: true, 
-              message: `Actualizadas ${updated} series. Errores: ${errors}`,
-              updated: updated,
-              errors: errors
-            });
-          }
-        });
-      });
-    });
-  });
-});
+
 
 // Este método se ejecuta cuando Electron ha terminado la inicialización
 app.whenReady().then(() => {
