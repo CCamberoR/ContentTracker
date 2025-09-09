@@ -1,4 +1,4 @@
-# 🧭 Mi Brújula de Conocimiento - ContentTracker v1.0.0
+# 🧭 ContentTracker v1.0.0
 
 Una aplicación de escritorio moderna para gestionar y rastrear tu viaje de aprendizaje personal. Desde libros y audiolibros hasta podcasts y cursos, mantén organizados todos tus recursos de conocimiento en un solo lugar.
 
